@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 439370342040632930}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0.63440317, z: 0}
   m_LocalScale: {x: 0.30049795, y: 1.5495844, z: 0.33943707}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -269,7 +269,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GoalZone
   goal: {fileID: 2614067859029596845}
-  pantallaVictoria: {fileID: 0}
 --- !u!1 &8780429055865287735
 GameObject:
   m_ObjectHideFlags: 0
@@ -297,7 +296,7 @@ Transform:
   m_GameObject: {fileID: 8780429055865287735}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.0099, y: 0.63440317, z: 0.0015}
+  m_LocalPosition: {x: -0.0099, y: 0.20459768, z: 0.0015}
   m_LocalScale: {x: 0.81302357, y: 1, z: 0.8487514}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -337,7 +336,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 7db8b42195603a841be1a1b01c04eeff, type: 2}
+  - {fileID: 2100000, guid: 4541e79d246a7c645bd5086db2c95eeb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

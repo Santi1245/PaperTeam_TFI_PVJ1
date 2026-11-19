@@ -40,7 +40,8 @@ public class Attack : MonoBehaviour
     {
         if (!isPlayer) return;
 
-        if (Input.GetKeyDown(KeyCode.Mouse0) && canAttack)
+        // Ataque con la tecla C
+        if (Input.GetKeyDown(KeyCode.C) && canAttack)
         {
             if (isMelee) Melee();
             else Shoot();

@@ -12,7 +12,7 @@ public class EnemyAI : MonoBehaviour
 
     [Header("AI settings")]
     [SerializeField] private float radiusDetection = 10f;
-    [SerializeField] private float radiusAttack = 2f;
+    [SerializeField] private float radiusAttack = 2.5f;
     [SerializeField] private float waitTime = 1f;
     [SerializeField] private float attackCooldown = 1.5f;
     [SerializeField] private float attackWindup = 0.5f;
@@ -26,6 +26,7 @@ public class EnemyAI : MonoBehaviour
     private bool isAttacking = false;
 
     private NavMeshAgent agent;
+    private Animator anim;
     private Transform playerTransform;
     private HealthSystem healthSystemPlayer;
     private PlayerMovement playerMovement;
@@ -33,6 +34,7 @@ public class EnemyAI : MonoBehaviour
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        anim = GetComponentInChildren<Animator>();
     }
 
     void Start()
@@ -41,7 +43,7 @@ public class EnemyAI : MonoBehaviour
 
         if (player != null)
         {
-            playerTransform = player.GetComponent<Transform>();
+            playerTransform = player.transform;
             healthSystemPlayer = player.GetComponent<HealthSystem>();
             playerMovement = player.GetComponent<PlayerMovement>();
         }
@@ -50,6 +52,9 @@ public class EnemyAI : MonoBehaviour
         {
             Debug.LogError("[EnemyAI] El agente NO está sobre el NavMesh. Rebakea el NavMesh.");
         }
+
+        // Clave: el agente tiene que poder llegar hasta el jugador
+        agent.stoppingDistance = 0.5f;
     }
 
     private void Update()
@@ -62,25 +67,27 @@ public class EnemyAI : MonoBehaviour
             if (currentState != AIState.Patrol)
             {
                 currentState = AIState.Patrol;
-                if (agent.isOnNavMesh) agent.isStopped = false;
+                agent.isStopped = false;
                 GoNext();
             }
+            UpdateAnimation();
             return;
         }
 
-        // Si el jugador es invisible, el enemigo no lo detecta
         if (playerMovement != null && playerMovement.EsInvisible)
         {
             if (currentState != AIState.Patrol)
             {
                 currentState = AIState.Patrol;
-                if (agent.isOnNavMesh) agent.isStopped = false;
+                agent.isStopped = false;
                 GoNext();
             }
+            UpdateAnimation();
             return;
         }
 
-        float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
+        // Distancia horizontal: ignora la altura del pivot
+        float distanceToPlayer = DistanciaHorizontal();
 
         switch (currentState)
         {
@@ -96,6 +103,37 @@ public class EnemyAI : MonoBehaviour
                 UpdateAttackState(distanceToPlayer);
                 break;
         }
+
+        UpdateAnimation();
+    }
+
+private float DistanciaHorizontal()
+    {
+    Vector3 a = transform.position;
+    Vector3 b = playerTransform.position;
+    a.y = 0f;
+    b.y = 0f;
+
+    // Resta el radio de los colliders: mide borde a borde, no centro a centro
+    float radioEnemigo = 0.5f;
+    float radioJugador = 0.5f;
+
+    Collider colEnemigo = GetComponent<Collider>();
+    if (colEnemigo != null) radioEnemigo = colEnemigo.bounds.extents.x;
+
+    Collider colJugador = playerTransform.GetComponent<Collider>();
+    if (colJugador != null) radioJugador = colJugador.bounds.extents.x;
+
+    return Vector3.Distance(a, b) - radioEnemigo - radioJugador;
+    }
+
+
+    private void UpdateAnimation()
+    {
+        if (anim == null) return;
+
+        bool moviendo = agent.velocity.magnitude > 0.1f;
+        anim.SetBool("isWalking", moviendo);
     }
 
     private void UpdatePatrolState(float distance)
@@ -117,10 +155,7 @@ public class EnemyAI : MonoBehaviour
 
     private void UpdateChaseState(float distance)
     {
-        if (agent.isOnNavMesh)
-        {
-            agent.SetDestination(playerTransform.position);
-        }
+        agent.SetDestination(playerTransform.position);
 
         if (distance <= radiusAttack)
         {
@@ -176,19 +211,18 @@ public class EnemyAI : MonoBehaviour
 
     private IEnumerator AttackCooldown()
     {
-        if (agent.isOnNavMesh) agent.isStopped = true;
+        agent.isStopped = true;
 
         yield return new WaitForSeconds(attackWindup);
 
-        if (playerTransform != null &&
-            Vector3.Distance(transform.position, playerTransform.position) <= radiusAttack)
+        if (playerTransform != null && DistanciaHorizontal() <= radiusAttack)
         {
             ExecuteAttack();
         }
 
         yield return new WaitForSeconds(attackCooldown);
 
-        if (agent.isOnNavMesh) agent.isStopped = false;
+        agent.isStopped = false;
 
         isAttacking = false;
     }

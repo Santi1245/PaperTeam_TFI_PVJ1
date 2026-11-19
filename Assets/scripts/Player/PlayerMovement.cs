@@ -69,7 +69,8 @@ public class PlayerMovement : MonoBehaviour
 
         CheckGround();
 
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        // Salto con la tecla X
+        if (Input.GetKeyDown(KeyCode.X) && isGrounded)
         {
             rb.AddForce(new Vector3(0, jumpForce, 0));
         }

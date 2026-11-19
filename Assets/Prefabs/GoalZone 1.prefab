@@ -129,7 +129,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GoalZone
   goal: {fileID: 384442128229353970}
-  pantallaVictoria: {fileID: 0}
 --- !u!1 &6948441755026359436
 GameObject:
   m_ObjectHideFlags: 0
@@ -196,7 +195,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 7db8b42195603a841be1a1b01c04eeff, type: 2}
+  - {fileID: 2100000, guid: 4541e79d246a7c645bd5086db2c95eeb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

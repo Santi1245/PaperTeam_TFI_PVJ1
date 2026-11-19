@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using TMPro;
 
 public enum GameState
 {
@@ -15,6 +16,10 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    public int Score => score;
+    public bool EstaPausado => currentState == GameState.Paused;
+    public bool EstaJugando => currentState == GameState.Playing;
+
     [Header("State Settings")]
     [SerializeField] private GameState currentState;
 
@@ -26,6 +31,10 @@ public class GameManager : MonoBehaviour
     [Header("Puntaje")]
     [SerializeField] private int score;
     [SerializeField] private TMPro.TextMeshProUGUI scoreText;
+
+    [Header("Monedas")]
+    [SerializeField] private int monedas = 0;
+    [SerializeField] private TextMeshProUGUI textoMonedas;
 
     [Header("UI")]
     [SerializeField] private GameObject victoryPanel;
@@ -58,15 +67,11 @@ public class GameManager : MonoBehaviour
 
         totalEnemies = enemies.Length;
         enemiesRemaining = totalEnemies;
-        ChangeState(GameState.Playing);
-    }
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            Paused();
-        }
+        CargarMonedas();
+        ActualizarMonedasUI();
+
+        ChangeState(GameState.Playing);
     }
 
     public void ChangeState(GameState newState)
@@ -112,7 +117,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(delay);
 
         Debug.Log("Cargando: " + levelSelectSceneName);
-        Time.timeScale = 1f;   
+        Time.timeScale = 1f;
         SceneManager.LoadScene(levelSelectSceneName);
     }
 
@@ -131,9 +136,53 @@ public class GameManager : MonoBehaviour
     public void AddScore(int amount)
     {
         score += amount;
-        if (scoreText != null) scoreText.text = $"Puntos: {score}";
+        if (scoreText != null) scoreText.text = $"x{score}";
         Debug.Log($"<color=orange>Puntaje: {score}</color>");
     }
+
+    // ---------- MONEDAS ----------
+
+    public void SumarMoneda(int cantidad)
+    {
+        monedas += cantidad;
+        ActualizarMonedasUI();
+        GuardarMonedas();
+        Debug.Log($"<color=yellow>Monedas: {monedas}</color>");
+    }
+
+    public int GetMonedas()
+    {
+        return monedas;
+    }
+
+    public bool GastarMonedas(int cantidad)
+    {
+        if (monedas < cantidad) return false;
+
+        monedas -= cantidad;
+        ActualizarMonedasUI();
+        GuardarMonedas();
+        return true;
+    }
+
+    void ActualizarMonedasUI()
+    {
+        if (textoMonedas != null)
+            textoMonedas.text = "x" + monedas.ToString();
+    }
+
+    void GuardarMonedas()
+    {
+        PlayerPrefs.SetInt("Monedas", monedas);
+        PlayerPrefs.Save();
+    }
+
+    void CargarMonedas()
+    {
+        monedas = PlayerPrefs.GetInt("Monedas", 0);
+    }
+
+    // ---------- ESTADOS ----------
 
     public void NotifyPlayerDead()
     {
@@ -147,7 +196,6 @@ public class GameManager : MonoBehaviour
 
         enemiesRemaining--;
         Debug.Log($"Enemigos restantes: {enemiesRemaining}");
-
     }
 
     public void NotifyGoalZone()
