@@ -1,2 +1,17 @@
 fileFormatVersion: 2
 guid: 315b17faf8c3a98488faca842e6f9d7f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - gameData: {fileID: 11400000, guid: 14ea5d4ec68eb7440b838f2caf3eaa73, type: 2}
+  - playerStats: {fileID: 11400000, guid: c04e64c82b96a6740845d18474e0ff1d, type: 2}
+  - scoreText: {instanceID: 0}
+  - textoMonedas: {instanceID: 0}
+  - victoryPanel: {instanceID: 0}
+  - gameOverPanel: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

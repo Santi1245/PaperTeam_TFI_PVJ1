@@ -32,6 +32,7 @@ public class UIManager : MonoBehaviour
 
     public void OnPlayPressed()
     {
+        Time.timeScale = 1f;
         SceneManager.LoadScene("Nivel1");
     }
 
@@ -55,7 +56,6 @@ public class UIManager : MonoBehaviour
         Application.Quit();
     }
 
-    // Alterna el estado guardado en la variable
     public void ToggleMusic()
     {
         musicaActiva = !musicaActiva;

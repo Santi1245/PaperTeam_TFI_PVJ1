@@ -107,26 +107,25 @@ public class EnemyAI : MonoBehaviour
         UpdateAnimation();
     }
 
-private float DistanciaHorizontal()
+    private float DistanciaHorizontal()
     {
-    Vector3 a = transform.position;
-    Vector3 b = playerTransform.position;
-    a.y = 0f;
-    b.y = 0f;
+        Vector3 a = transform.position;
+        Vector3 b = playerTransform.position;
+        a.y = 0f;
+        b.y = 0f;
 
-    // Resta el radio de los colliders: mide borde a borde, no centro a centro
-    float radioEnemigo = 0.5f;
-    float radioJugador = 0.5f;
+        // Resta el radio de los colliders: mide borde a borde, no centro a centro
+        float radioEnemigo = 0.5f;
+        float radioJugador = 0.5f;
 
-    Collider colEnemigo = GetComponent<Collider>();
-    if (colEnemigo != null) radioEnemigo = colEnemigo.bounds.extents.x;
+        Collider colEnemigo = GetComponent<Collider>();
+        if (colEnemigo != null) radioEnemigo = colEnemigo.bounds.extents.x;
 
-    Collider colJugador = playerTransform.GetComponent<Collider>();
-    if (colJugador != null) radioJugador = colJugador.bounds.extents.x;
+        Collider colJugador = playerTransform.GetComponent<Collider>();
+        if (colJugador != null) radioJugador = colJugador.bounds.extents.x;
 
-    return Vector3.Distance(a, b) - radioEnemigo - radioJugador;
+        return Vector3.Distance(a, b) - radioEnemigo - radioJugador;
     }
-
 
     private void UpdateAnimation()
     {
@@ -245,9 +244,36 @@ private float DistanciaHorizontal()
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.yellow;
+        // Color según el estado actual: se ve en el editor mientras jugás
+        switch (currentState)
+        {
+            case AIState.Patrol: Gizmos.color = Color.green; break;
+            case AIState.Chase:  Gizmos.color = Color.yellow; break;
+            case AIState.Attack: Gizmos.color = Color.red; break;
+        }
+
+        // Rango de detección
         Gizmos.DrawWireSphere(transform.position, radiusDetection);
-        Gizmos.color = Color.red;
+
+        // Rango de ataque
+        Gizmos.color = new Color(1f, 0f, 0f, 0.6f);
         Gizmos.DrawWireSphere(transform.position, radiusAttack);
+
+        // Recorrido de patrulla
+        if (controlPoints == null || controlPoints.Length == 0) return;
+
+        Gizmos.color = Color.cyan;
+        for (int i = 0; i < controlPoints.Length; i++)
+        {
+            if (controlPoints[i] == null) continue;
+
+            Gizmos.DrawSphere(controlPoints[i].position, 0.3f);
+
+            Transform siguiente = controlPoints[(i + 1) % controlPoints.Length];
+            if (siguiente != null)
+            {
+                Gizmos.DrawLine(controlPoints[i].position, siguiente.position);
+            }
+        }
     }
 }

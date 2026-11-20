@@ -11,13 +11,15 @@ public class monedarotacion : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (!other.CompareTag("Player")) return;
+
+        if (GameManager.Instance == null)
         {
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.AddScore(1);
-            }
-            Destroy(gameObject);
+            Debug.LogError("monedarotacion: GameManager.Instance es NULL. La moneda NO se recoge.");
+            return;
         }
+
+        GameManager.Instance.SumarMoneda(1);
+        Destroy(gameObject);
     }
 }
