@@ -1,2 +1,22 @@
 fileFormatVersion: 2
 guid: 1b5e651b2ec37ca429f71cece13921b9
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - playerStats: {fileID: 11400000, guid: c04e64c82b96a6740845d18474e0ff1d, type: 2}
+  - gameData: {fileID: 11400000, guid: 14ea5d4ec68eb7440b838f2caf3eaa73, type: 2}
+  - panelTienda: {instanceID: 0}
+  - textoMonedas: {instanceID: 0}
+  - textoMensaje: {instanceID: 0}
+  - botonCurar: {instanceID: 0}
+  - botonVidaMaxima: {instanceID: 0}
+  - botonVelocidad: {instanceID: 0}
+  - audioSource: {instanceID: 0}
+  - sonidoCompra: {instanceID: 0}
+  - sonidoError: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

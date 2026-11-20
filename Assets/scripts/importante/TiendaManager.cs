@@ -6,6 +6,7 @@ public class TiendaManager : MonoBehaviour
 {
     [Header("Referencias")]
     [SerializeField] private PlayerStats playerStats;
+    [SerializeField] private GameData gameData;
     [SerializeField] private GameObject panelTienda;
     [SerializeField] private TextMeshProUGUI textoMonedas;
     [SerializeField] private TextMeshProUGUI textoMensaje;
@@ -55,14 +56,14 @@ public class TiendaManager : MonoBehaviour
     {
         if (!PuedeComprar(costoCurar)) return;
 
-        if (playerStats.currentHealth >= playerStats.maxHealth)
+        if (gameData.currentHealth >= playerStats.maxHealth)
         {
             MostrarMensaje("Ya tenes la vida al maximo");
             return;
         }
 
-        playerStats.currentScore -= costoCurar;
-        playerStats.currentHealth = playerStats.maxHealth;
+        gameData.currentCoins -= costoCurar;
+        gameData.currentHealth = playerStats.maxHealth;
         ComprarExitoso("Vida restaurada");
     }
 
@@ -70,9 +71,9 @@ public class TiendaManager : MonoBehaviour
     {
         if (!PuedeComprar(costoVidaMaxima)) return;
 
-        playerStats.currentScore -= costoVidaMaxima;
+        gameData.currentCoins -= costoVidaMaxima;
         playerStats.maxHealth += bonusVidaMaxima;
-        playerStats.currentHealth += bonusVidaMaxima;
+        gameData.currentHealth += bonusVidaMaxima;
         ComprarExitoso("Vida maxima +" + bonusVidaMaxima);
     }
 
@@ -80,7 +81,7 @@ public class TiendaManager : MonoBehaviour
     {
         if (!PuedeComprar(costoVelocidad)) return;
 
-        playerStats.currentScore -= costoVelocidad;
+        gameData.currentCoins -= costoVelocidad;
         playerStats.walkSpeed += bonusVelocidad;
         playerStats.runSpeed += bonusVelocidad;
         ComprarExitoso("Velocidad +" + bonusVelocidad);
@@ -88,7 +89,7 @@ public class TiendaManager : MonoBehaviour
 
     private bool PuedeComprar(int costo)
     {
-        if (playerStats.currentScore < costo)
+        if (gameData.currentCoins < costo)
         {
             MostrarMensaje("No tenes monedas suficientes");
             if (audioSource != null && sonidoError != null) audioSource.PlayOneShot(sonidoError);
@@ -111,7 +112,7 @@ public class TiendaManager : MonoBehaviour
 
     private void ActualizarUI()
     {
-        if (textoMonedas != null && playerStats != null)
-            textoMonedas.text = "Monedas: " + playerStats.currentScore;
+        if (textoMonedas != null && gameData != null)
+            textoMonedas.text = "Monedas: " + gameData.currentCoins;
     }
 }

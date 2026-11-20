@@ -12,9 +12,22 @@ public class HealthSystem : MonoBehaviour
     [SerializeField] private bool isDead;
     public bool IsDead => isDead;
 
+    [Header("Persistencia (solo Player)")]
+    [SerializeField] private PlayerStats playerStats;
+    [SerializeField] private GameData gameData;
+
+    private bool EsPlayer => CompareTag("Player");
+
     private void Awake()
     {
-        currentHealth = maxHealth;
+        if (EsPlayer && playerStats != null)
+            maxHealth = playerStats.maxHealth;
+
+        if (EsPlayer && gameData != null)
+            currentHealth = Mathf.Clamp(gameData.currentHealth, 0f, maxHealth);
+        else
+            currentHealth = maxHealth;
+
         isDead = false;
         Debug.Log($"Salud actual: {currentHealth}");
     }
@@ -26,6 +39,8 @@ public class HealthSystem : MonoBehaviour
 
         currentHealth -= amount;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
+
+        GuardarEnGameData();
 
         Debug.Log($"Salud actual: {currentHealth}");
 
@@ -43,7 +58,15 @@ public class HealthSystem : MonoBehaviour
         currentHealth += amount;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
 
+        GuardarEnGameData();
+
         Debug.Log($"Salud actual: {currentHealth}");
+    }
+
+    private void GuardarEnGameData()
+    {
+        if (EsPlayer && gameData != null)
+            gameData.currentHealth = currentHealth;
     }
 
     private void Dead()
