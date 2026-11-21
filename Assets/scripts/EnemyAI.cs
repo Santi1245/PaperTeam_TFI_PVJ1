@@ -19,6 +19,10 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private float attackDamage = 10f;
     [SerializeField] private float rotationSpeed = 5f;
 
+    [Header("Dificultad")]
+    [SerializeField] private float multiplicadorDanio = 1f;
+    [SerializeField] private float multiplicadorDeteccion = 1f;
+
     [SerializeField] private Transform[] controlPoints;
 
     private int currentPointIndex;
@@ -30,6 +34,9 @@ public class EnemyAI : MonoBehaviour
     private Transform playerTransform;
     private HealthSystem healthSystemPlayer;
     private PlayerMovement playerMovement;
+
+    private float danioFinal;
+    private float deteccionFinal;
 
     private void Awake()
     {
@@ -53,8 +60,20 @@ public class EnemyAI : MonoBehaviour
             Debug.LogError("[EnemyAI] El agente NO está sobre el NavMesh. Rebakea el NavMesh.");
         }
 
-        // Clave: el agente tiene que poder llegar hasta el jugador
         agent.stoppingDistance = 0.5f;
+
+        // Lee la dificultad elegida en el menu
+        if (DificultadManager.Instance != null)
+        {
+            multiplicadorDanio = DificultadManager.Instance.GetMultiplicador();
+            deteccionFinal = radiusDetection * multiplicadorDeteccion;
+        }
+        else
+        {
+            deteccionFinal = radiusDetection;
+        }
+
+        danioFinal = attackDamage * multiplicadorDanio;
     }
 
     private void Update()
@@ -86,7 +105,6 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        // Distancia horizontal: ignora la altura del pivot
         float distanceToPlayer = DistanciaHorizontal();
 
         switch (currentState)
@@ -114,7 +132,6 @@ public class EnemyAI : MonoBehaviour
         a.y = 0f;
         b.y = 0f;
 
-        // Resta el radio de los colliders: mide borde a borde, no centro a centro
         float radioEnemigo = 0.5f;
         float radioJugador = 0.5f;
 
@@ -137,7 +154,7 @@ public class EnemyAI : MonoBehaviour
 
     private void UpdatePatrolState(float distance)
     {
-        if (distance <= radiusDetection)
+        if (distance <= deteccionFinal)
         {
             currentState = AIState.Chase;
             return;
@@ -162,7 +179,7 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        if (distance > radiusDetection * 1.2f)
+        if (distance > deteccionFinal * 1.2f)
         {
             currentState = AIState.Patrol;
             GoNext();
@@ -231,7 +248,7 @@ public class EnemyAI : MonoBehaviour
         if (healthSystemPlayer == null) return;
         if (healthSystemPlayer.IsDead) return;
 
-        healthSystemPlayer.TakeDamage(attackDamage);
+        healthSystemPlayer.TakeDamage(danioFinal);
     }
 
     private void GoNext()
@@ -244,7 +261,6 @@ public class EnemyAI : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        // Color según el estado actual: se ve en el editor mientras jugás
         switch (currentState)
         {
             case AIState.Patrol: Gizmos.color = Color.green; break;
@@ -252,14 +268,11 @@ public class EnemyAI : MonoBehaviour
             case AIState.Attack: Gizmos.color = Color.red; break;
         }
 
-        // Rango de detección
         Gizmos.DrawWireSphere(transform.position, radiusDetection);
 
-        // Rango de ataque
         Gizmos.color = new Color(1f, 0f, 0f, 0.6f);
         Gizmos.DrawWireSphere(transform.position, radiusAttack);
 
-        // Recorrido de patrulla
         if (controlPoints == null || controlPoints.Length == 0) return;
 
         Gizmos.color = Color.cyan;

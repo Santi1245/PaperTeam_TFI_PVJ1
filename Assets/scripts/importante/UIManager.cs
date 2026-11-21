@@ -8,11 +8,13 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject titlePanel;
     [SerializeField] private GameObject optionsPanel;
     [SerializeField] private GameObject extrasPanel;
+    [SerializeField] private GameObject difficultyPanel;
 
     [Header("Audio")]
     [SerializeField] private AudioSource musicSource;
 
     private const string KEY_MUSICA = "MusicaActiva";
+    private const string KEY_DIFICULTAD = "dificultad";
     private bool musicaActiva = true;
 
     private void Start()
@@ -28,12 +30,26 @@ public class UIManager : MonoBehaviour
         titlePanel.SetActive(panel == titlePanel);
         optionsPanel.SetActive(panel == optionsPanel);
         extrasPanel.SetActive(panel == extrasPanel);
+        difficultyPanel.SetActive(panel == difficultyPanel);
     }
 
+    // PLAY -> abre el panel de dificultad
     public void OnPlayPressed()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("Nivel1");
+        ShowPanel(difficultyPanel);
+    }
+
+    // Botones de dificultad -> guardan y cargan el Tutorial
+    public void OnFacilPressed()   { CargarTutorial(1); }
+    public void OnNormalPressed()  { CargarTutorial(2); }
+    public void OnDificilPressed() { CargarTutorial(3); }
+
+    private void CargarTutorial(int nivel)
+    {
+        PlayerPrefs.SetInt(KEY_DIFICULTAD, nivel);
+        PlayerPrefs.Save();
+        SceneManager.LoadScene("Tutorial");
     }
 
     public void OnOptionsPressed()
