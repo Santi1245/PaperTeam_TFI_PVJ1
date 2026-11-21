@@ -34,7 +34,7 @@ Victoria y Game Over.
 | Recoger y abrir cosas | E |
 | Poder especial de velocidad | Z |
 | Atacar | C |
-| Saltar | Espacio |
+| Saltar | X |
 | Pausar | P |
 
 ## Arquitectura
