@@ -22,14 +22,29 @@ public class SFXManager : MonoBehaviour
 
         Instance = this;
 
-        // Solo este objeto se persiste, nunca su padre ni el Canvas.
-        // Si tiene padre, lo desenganchamos antes para no arrastrar la jerarquia.
         if (transform.parent != null)
             transform.SetParent(null);
 
         DontDestroyOnLoad(gameObject);
 
         if (sourceSFX == null) sourceSFX = GetComponent<AudioSource>();
+        if (sourceUI  == null) sourceUI  = GetComponent<AudioSource>();
+    }
+
+    private void Start()
+    {
+        if (PlayerPrefsManager.Instance == null) return;
+
+        PlayerPrefsManager.Instance.RegistrarSFX(sourceSFX);
+        PlayerPrefsManager.Instance.RegistrarUI(sourceUI);
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance != this || PlayerPrefsManager.Instance == null) return;
+
+        PlayerPrefsManager.Instance.Desregistrar(sourceSFX);
+        PlayerPrefsManager.Instance.Desregistrar(sourceUI);
     }
 
     public void PlaySFX(int index)
@@ -48,3 +63,4 @@ public class SFXManager : MonoBehaviour
         sourceUI.PlayOneShot(uiClips[index]);
     }
 }
+
