@@ -25,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody rb;
     private Animator anim;
     private Transform cameraTransform;
+    private HealthSystem health;
 
     [Header("Raycast Settings")]
     [SerializeField] private bool isGrounded;
@@ -43,6 +44,7 @@ public class PlayerMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         anim = GetComponent<Animator>();
+        health = GetComponent<HealthSystem>();
 
         if (Camera.main != null)
             cameraTransform = Camera.main.transform;
@@ -52,7 +54,15 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (isStop) return;
+        if (isStop || (health != null && health.IsDead))
+        {
+            if (anim != null)
+            {
+                anim.SetFloat("moveX", 0f);
+                anim.SetFloat("moveY", 0f);
+            }
+            return;
+        }
 
         moveHorizontal = 0f;
         moveVertical = 0f;
@@ -65,11 +75,30 @@ public class PlayerMovement : MonoBehaviour
         moveHorizontal = rel.x;
         moveVertical = rel.y;
 
-        anim.SetBool("isWalking", moveHorizontal != 0 || moveVertical != 0);
+        // Direccion en el mundo -> convertir a espacio del personaje
+        Vector3 worldDir = new Vector3(moveHorizontal, 0f, moveVertical);
+        Vector3 localDir = transform.InverseTransformDirection(worldDir);
+
+        float animX = 0f;
+        float animY = 0f;
+
+        if (localDir.sqrMagnitude > 0.0001f)
+        {
+            if (Mathf.Abs(localDir.x) >= Mathf.Abs(localDir.z))
+            {
+                animX = localDir.x > 0f ? 1f : -1f;
+            }
+            else
+            {
+                animY = localDir.z > 0f ? 1f : -1f;
+            }
+        }
+
+        anim.SetFloat("moveX", animX);
+        anim.SetFloat("moveY", animY);
 
         CheckGround();
 
-        // Salto con la tecla X
         if (Input.GetKeyDown(KeyCode.X) && isGrounded)
         {
             rb.AddForce(new Vector3(0, jumpForce, 0));
@@ -78,7 +107,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (isStop)
+        if (isStop || (health != null && health.IsDead))
         {
             rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
             return;

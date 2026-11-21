@@ -20,6 +20,9 @@ public class GameManager : MonoBehaviour
     public bool EstaPausado => currentState == GameState.Paused;
     public bool EstaJugando => currentState == GameState.Playing;
 
+    // Lo que usa la tienda
+    public int Monedas => gameData != null ? gameData.currentCoins : 0;
+
     [Header("Persistencia")]
     [SerializeField] private GameData gameData;
     [SerializeField] private PlayerStats playerStats;
@@ -42,7 +45,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject victoryPanel;
     [SerializeField] private GameObject gameOverPanel;
 
-    [SerializeField] private string victorySceneName = "Victory";
+    [Header("Escenas")]
+    [SerializeField] private string mainMenuSceneName = "MainMenu";
     [SerializeField] private float victoryDelay = 2f;
     [SerializeField] private float gameOverDelay = 2f;
 
@@ -51,15 +55,8 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        // Cada escena tiene su propio GameManager: siempre es el activo
+        Instance = this;
     }
 
     void Start()
@@ -67,7 +64,7 @@ public class GameManager : MonoBehaviour
         if (gameData == null)
             Debug.LogError("[GameManager] Falta asignar el asset GameData en el Inspector.");
         else
-            Debug.Log("[GameManager] Escena " + SceneManager.GetActiveScene().name +
+                        Debug.Log("[GameManager] Escena " + SceneManager.GetActiveScene().name +
                       " | asset: " + gameData.name +
                       " | monedas: " + gameData.currentCoins +
                       " | vida: " + gameData.currentHealth);
@@ -85,6 +82,11 @@ public class GameManager : MonoBehaviour
         ActualizarPuntajeUI();
 
         ChangeState(GameState.Playing);
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
     }
 
     public void ChangeState(GameState newState)
@@ -151,9 +153,11 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log($"Ultimo nivel completado ({actual}) -> cargando {victorySceneName}");
+            // Ultimo nivel (Nivel2): se reinicia todo y se vuelve al menu
+            Debug.Log($"Ultimo nivel completado ({actual}) -> reiniciando partida");
+            ReiniciarPartidaCompleta();
             Time.timeScale = 1f;
-            SceneManager.LoadScene(victorySceneName);
+            SceneManager.LoadScene(mainMenuSceneName);
         }
     }
 
@@ -163,6 +167,35 @@ public class GameManager : MonoBehaviour
             ChangeState(GameState.Paused);
         else if (currentState == GameState.Paused)
             ChangeState(GameState.Playing);
+    }
+
+    // ---------- RESET DE PARTIDA ----------
+
+    public void ReiniciarPartidaCompleta()
+    {
+        if (gameData != null)
+        {
+            float vidaMax = playerStats != null ? playerStats.maxHealth : 100f;
+            gameData.ResetProgress(vidaMax);
+            Debug.Log("[GameManager] GameData reseteado -> vida: " + gameData.currentHealth +
+                      " | monedas: " + gameData.currentCoins +
+                      " | puntaje: " + gameData.currentScore);
+        }
+        else
+        {
+            Debug.LogError("[GameManager] No se pudo resetear GameData: falta asignarlo.");
+        }
+
+        if (playerStats != null)
+        {
+            playerStats.ResetStats();
+            Debug.Log("[GameManager] PlayerStats reseteado.");
+        }
+
+        // Solo borra las claves de partida, conserva volumen/dificultad
+        PlayerPrefs.DeleteKey("puntajeMaximo");
+        PlayerPrefs.Save();
+        Debug.Log("[GameManager] PlayerPrefs de partida borrados. Listo para nueva partida.");
     }
 
     // ---------- PUNTAJE ----------
@@ -208,6 +241,12 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
+    // Alias para la tienda
+    public bool RestarMonedas(int cantidad)
+    {
+        return GastarMonedas(cantidad);
+    }
+
     void ActualizarMonedasUI()
     {
         if (textoMonedas != null && gameData != null)
@@ -244,7 +283,7 @@ public class GameManager : MonoBehaviour
 
     public void NotifyGoalZone()
     {
-        if (currentState != GameState.Playing) return;
-        ChangeState(GameState.Victory);
+        if (currentState == GameState.Playing)
+            ChangeState(GameState.Victory);
     }
 }

@@ -47,20 +47,24 @@ public class TiendaCilindro : MonoBehaviour
             return;
         }
 
-        int scoreActual = GameManager.Instance.Score;
+        // >>> CAMBIA ESTA LINEA por la propiedad real de monedas de tu GameManager
+        int monedasActuales = GameManager.Instance.Monedas;
 
-        if (scoreActual >= costo)
+        Debug.Log($"Monedas detectadas por la tienda: {monedasActuales} | Costo: {costo}");
+
+        if (monedasActuales >= costo)
         {
-            GameManager.Instance.AddScore(-costo);
+            // >>> CAMBIA ESTO por el metodo real que resta monedas
+            GameManager.Instance.RestarMonedas(costo);
 
             float faltante = playerHealth.MaxHealth - playerHealth.CurrentHealth;
             playerHealth.Heal(faltante);
 
-            Debug.Log($"Curado completo. Score restante: {GameManager.Instance.Score}");
+            Debug.Log($"Curado completo. Monedas restantes: {GameManager.Instance.Monedas}");
         }
         else
         {
-            Debug.Log($"No alcanza: tenes {scoreActual} y necesitas {costo}");
+            Debug.Log($"No alcanza: tenes {monedasActuales} y necesitas {costo}");
             StartCoroutine(ParpadearRojo());
         }
     }
